@@ -1,0 +1,31 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: web-app-release
+  namespace: default
+spec:
+  interval: 1m
+  chart:
+    spec:
+      chart: web-app-chart 
+      sourceRef:
+        kind: GitRepository
+        name: webapp-helm-repo
+        namespace: flux-system
+  values:
+    image:
+      repository: us-central1-docker.pkg.dev/project-2026-486210/web-app-repo/web-app
+      tag: 1.0.3
+    env:
+      - name: height
+        value: "180"
+      - name: API_PREFIX
+        value: ""
+    livenessProbe:
+      httpGet:
+        path: /
+        port: http
+    readinessProbe:
+      httpGet:
+        path: /
+        port: http

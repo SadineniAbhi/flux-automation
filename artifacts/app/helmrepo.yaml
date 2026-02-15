@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: webapp-helm-repo
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/SadineniAbhi/web-app-chart.git
+  ref:
+    branch: main

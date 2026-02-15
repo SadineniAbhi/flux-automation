@@ -1,6 +1,6 @@
 import os
 import asyncio
-from main import Settings 
+from github_apis import Settings 
 
 envs = Settings()
 
@@ -36,8 +36,7 @@ async def flux_bootstrap_github(owner_name: str, repository_name: str, install_p
             "--branch=main",
             f"--path={install_path}",
             f"--kubeconfig={kubeconfig_path}", 
-            "--personal",
-            "--silent"
+            "--personal"
         ],
         env = {
             "GITHUB_TOKEN": envs.token
@@ -56,7 +55,7 @@ async def flux_uninstall(kubeconfig_path: str) -> tuple[int, str, str]:
     )
     return code, out, err
 if __name__ == "__main__":
-    code, out, err = asyncio.run(flux_uninstall(kubeconfig_path="kubeconfig/gkeconfig"))
-    #code, out, err = asyncio.run(flux_bootstrap_github(owner_name="SadineniAbhi", repository_name="test2004", install_path="clusters/gke", kubeconfig_path="kubeconfig/gkeconfig"))
+    #code, out, err = asyncio.run(flux_uninstall(kubeconfig_path="kubeconfig/gkeconfig"))
+    code, out, err = asyncio.run(flux_bootstrap_github(owner_name="SadineniAbhi", repository_name="test2004", install_path="clusters/gke", kubeconfig_path="kubeconfig/gkeconfig"))
     print(out)
     print(err)
