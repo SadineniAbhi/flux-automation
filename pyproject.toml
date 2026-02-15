@@ -1,0 +1,12 @@
+[project]
+name = "devops-genie"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.129.0",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
+    "pygithub>=2.8.1",
+]
