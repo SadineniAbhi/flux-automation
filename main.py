@@ -7,7 +7,6 @@ class Settings(BaseSettings):
     
 envs = Settings()
 
-
 def get_github_client() -> Github:
     """Create and return an authenticated GitHub client."""
     auth = Auth.Token(envs.token)
@@ -67,11 +66,4 @@ def list_token_scopes(g: Github) -> list[str]:
 if __name__ == "__main__":
     g = get_github_client()
     user = get_user(g)
-    #create_repo(user, "test2004", "This is abhi's test repository")
-    #repo = get_repo(user, "test2004")
-    # write_file(repo, "README.md", "This is abhi's test repository")
-    # print(read_file(repo, "README.md"))
-    #write_file(repo, "README.md", "This is abhi's test repository")
-    #delete_file(repo, "README.md")
-    #upload_file(repo, "pyproject.toml", "test/pyproject.toml")
-    list_token_scopes(g)
+    create_repo(user, "test2004", "This is abhi's test repository")
