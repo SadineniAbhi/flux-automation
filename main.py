@@ -1,4 +1,4 @@
-from github import Github, Auth, Organization
+from github import Github, Auth, Repository, NamedUser
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -7,21 +7,26 @@ class Settings(BaseSettings):
     
 envs = Settings()
 
-def get_github_client():
+
+def get_github_client() -> Github:
+    """Create and return an authenticated GitHub client."""
     auth = Auth.Token(envs.token)
     github_client = Github(auth=auth)
     return github_client
 
-def get_organization(g: Github):
-    org = g.get_organization("AbhiFluxProject")
-    return org
+def get_user(g: Github) -> NamedUser:
+    """Get the authenticated user from the GitHub client."""
+    user = g.get_user()
+    return user
 
-def get_repos(org: Organization):
-    for repo in org.get_repos():
-        print(f"  - {repo.name}")
+def get_repo(user: NamedUser, name: str) -> Repository:
+    """Get a repository by name for the given user."""
+    repo = user.get_repo(name)
+    return repo
 
-def create_repo(org: Organization, name: str, description: str = "", private: bool = True):
-    repo = org.create_repo(
+def create_repo(user: NamedUser, name: str, description: str = "", private: bool = True):
+    """Create a new repository under the user's account."""
+    repo = user.create_repo(
         name=name,
         description=description,
         private=private,
@@ -29,35 +34,44 @@ def create_repo(org: Organization, name: str, description: str = "", private: bo
     print(f"Created repo: {repo.html_url}")
     return repo
 
-def user_exists_in_org(g: Github, org: Organization, username: str) -> bool:
-    try:
-        user = g.get_user(username)
-        return org.has_in_members(user)
-    except Exception:
-        return False
-
-def write_file(g: Github, repo_name: str, path: str, content: str, message: str = "Update file"):
-    repo = g.get_repo(repo_name)
+def write_file(repo: Repository, path: str, content: str, message: str = "Update file"):
+    """Create or update a file in the repository."""
     try:
         file = repo.get_contents(path)
         repo.update_file(path, message, content, file.sha)
     except:
         repo.create_file(path, message, content)
 
-def read_file(g: Github, repo_name: str, path: str) -> str:
-    repo = g.get_repo(repo_name)
+def read_file(repo: Repository, path: str) -> str:
+    """Read and return the contents of a file from the repository."""
     file = repo.get_contents(path)
     return file.decoded_content.decode("utf-8")
 
-def delete_file(g: Github, repo_name: str, path: str, message: str = "Delete file"):
-    repo = g.get_repo(repo_name)
-    file = repo.get_contents(path)
-    repo.delete_file(path, message, file.sha)
+def upload_file(repo: Repository, local_path: str, repo_path: str, message: str = "Add file"):
+    """Upload a local file to the repository."""
+    with open(local_path, "rb") as f:
+        content = f.read()
+    repo.create_file(repo_path, message, content)
+
+def delete_repo(repo: Repository):
+    """Delete the given repository."""
+    repo.delete()
+    print(f"Deleted repo: {repo.html_url}")
+
+def list_token_scopes(g: Github) -> list[str]:
+    """Return the OAuth scopes available for the current token."""
+    g.get_user().login 
+    scopes = g.oauth_scopes or []
+    return scopes
 
 if __name__ == "__main__":
     g = get_github_client()
-    org = get_organization(g)
-    # create_repo(org, "test-repo", "This is a test repository")
-    #print(user_exists_in_org(g, org, "SadineniAbhi"))
-    write_file(g, "AbhiFluxProject/dummy", "README.md", "This is abhi's file")
-    get_repos(org)
+    user = get_user(g)
+    #create_repo(user, "test2004", "This is abhi's test repository")
+    #repo = get_repo(user, "test2004")
+    # write_file(repo, "README.md", "This is abhi's test repository")
+    # print(read_file(repo, "README.md"))
+    #write_file(repo, "README.md", "This is abhi's test repository")
+    #delete_file(repo, "README.md")
+    #upload_file(repo, "pyproject.toml", "test/pyproject.toml")
+    list_token_scopes(g)
