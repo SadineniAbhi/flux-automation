@@ -1,5 +1,5 @@
 [project]
-name = "devops-genie"
+name = "flux-automation"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -11,3 +11,6 @@ dependencies = [
     "pygithub>=2.8.1",
     "uvicorn>=0.40.0",
 ]
+
+[tool.pyright]
+typeCheckingMode = "strict"

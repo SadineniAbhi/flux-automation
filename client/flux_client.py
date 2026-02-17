@@ -26,6 +26,10 @@ class Flux:
         )
 
         stdout, stderr = await proc.communicate()
+
+        if proc.returncode is None:
+            raise RuntimeError(f"unexpected error: command {cmd} terminated without a return code")
+
         return proc.returncode, stdout.decode(), stderr.decode()
 
 
