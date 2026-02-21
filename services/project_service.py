@@ -1,3 +1,4 @@
+from exceptions.project_exceptions import ProjectNotFoundException
 from models.project import Project
 from repositories.project_repository import ProjectRepository
 from schemas.project_schema import CreateProjectRequest
@@ -15,3 +16,10 @@ class ProjectService:
             chart_path=request.chart_path,
         )
         return ProjectRepository.create_project(project)
+
+    @staticmethod
+    def get_projects(user_id: str) -> list[Project]:
+        projects = ProjectRepository.get_projects_by_user_id(user_id)
+        if len(projects) == 0:
+            raise ProjectNotFoundException(f"No projects found for user_id: {user_id}")
+        return projects

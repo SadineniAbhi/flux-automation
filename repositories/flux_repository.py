@@ -71,8 +71,10 @@ class Flux:
         return code, out, err
 
     async def flux_cleanup(self):
-        if self.kubeconfig_path:
-            os.remove(self.kubeconfig_path)
+        def _flux_cleanup_sync():
+            if self.kubeconfig_path:
+                os.remove(self.kubeconfig_path)
+        await asyncio.to_thread(_flux_cleanup_sync)
 
 
 if __name__ == "__main__":
