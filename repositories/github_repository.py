@@ -10,9 +10,9 @@ class GithubClient:
         auth = Auth.Token(self.token)
         self.github_client = Github(auth=auth)
 
-    async def get_user(self) -> AuthenticatedUser:
+    async def get_github_user(self) -> AuthenticatedUser:
         """Get the authenticated user from the GitHub client."""
-        def _get_user_sync() -> AuthenticatedUser:
+        def _get_user_sync(): 
             user = self.github_client.get_user()
             return cast(AuthenticatedUser, user)
 
@@ -20,7 +20,7 @@ class GithubClient:
 
     async def get_repo(self, repo_name: str) -> Repository:
         """Get a repository by name for the given user."""
-        user = await self.get_user()
+        user = await self.get_github_user()
 
         def _get_repo_sync(repo_name: str) -> Repository:
             repo = user.get_repo(repo_name)
@@ -30,7 +30,7 @@ class GithubClient:
 
     async def create_repo(self, repo_name: str, description: str = "", private: bool = True) -> Repository:
         """Create a new repository under the authenticated user's account."""
-        user = await self.get_user()
+        user = await self.get_github_user()
 
         def _create_repo_sync(repo_name: str, description: str, private: bool) -> Repository:
             repo = user.create_repo(
