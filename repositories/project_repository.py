@@ -1,90 +1,50 @@
 from datetime import datetime, UTC
-
 from sqlmodel import Session, select
-
 from models.project import Project
-from utils.db import engine
 
 
 class ProjectRepository:
 
-    @staticmethod
-    def create_project(project: Project) -> Project:
-        with Session(engine) as session:
-            session.add(project)
-            session.commit()
-            session.refresh(project)
-            return project
+    def __init__(self, user_id: str, session: Session):
+        self.user_id = user_id
+        self.session = session
 
-    @staticmethod
-    def get_project_by_id(project_id: int) -> Project | None:
-        with Session(engine) as session:
-            return session.get(Project, project_id)
+    def create_project(self, project: Project) -> Project:
+        project = Project.model_validate(project)
+        self.session.add(project)
+        self.session.commit()
+        self.session.refresh(project)
+        return project
 
-    @staticmethod
-    def get_projects_by_user_id(user_id: str) -> list[Project]:
-        with Session(engine) as session:
-            statement = select(Project).where(Project.user_id == user_id)
-            return list(session.exec(statement).all())
+    def get_project_by_id(self, project_id: int) -> Project | None:
+        project = self.session.get(Project, project_id)
+        if project is None or project.user_id != self.user_id:
+            return None
+        return project
 
-    @staticmethod
-    def update_name(project_id: int, name: str) -> Project | None:
-        with Session(engine) as session:
-            project = session.get(Project, project_id)
-            if project is None:
-                return None
-            project.name = name
-            project.updated_at = datetime.now(UTC)
-            session.add(project)
-            session.commit()
-            session.refresh(project)
-            return project
+    def get_projects_by_user_id(self) -> list[Project]:
+        statement = select(Project).where(Project.user_id == self.user_id)
+        return list(self.session.exec(statement).all())
 
-    @staticmethod
-    def update_description(project_id: int, description: str) -> Project | None:
-        with Session(engine) as session:
-            project = session.get(Project, project_id)
-            if project is None:
-                return None
-            project.description = description
-            project.updated_at = datetime.now(UTC)
-            session.add(project)
-            session.commit()
-            session.refresh(project)
-            return project
+    def update_project(self, project_id: int, data: Project) -> Project | None:
+        data = Project.model_validate(data)
+        project = self.session.get(Project, project_id)
+        if project is None or project.user_id != self.user_id:
+            return None
+        project.name = data.name.strip()
+        project.description = data.description.strip()
+        project.helm_chart_github_url = data.helm_chart_github_url.strip()
+        project.chart_path = data.chart_path.strip()
+        project.updated_at = datetime.now(UTC)
+        self.session.add(project)
+        self.session.commit()
+        self.session.refresh(project)
+        return project
 
-    @staticmethod
-    def update_helm_chart_github_url(project_id: int, helm_chart_github_url: str) -> Project | None:
-        with Session(engine) as session:
-            project = session.get(Project, project_id)
-            if project is None:
-                return None
-            project.helm_chart_github_url = helm_chart_github_url
-            project.updated_at = datetime.now(UTC)
-            session.add(project)
-            session.commit()
-            session.refresh(project)
-            return project
-
-    @staticmethod
-    def update_chart_path(project_id: int, chart_path: str) -> Project | None:
-        with Session(engine) as session:
-            project = session.get(Project, project_id)
-            if project is None:
-                return None
-            project.chart_path = chart_path
-            project.updated_at = datetime.now(UTC)
-            session.add(project)
-            session.commit()
-            session.refresh(project)
-            return project
-
-    @staticmethod
-    def delete_project(project_id: int) -> bool:
-        with Session(engine) as session:
-            project = session.get(Project, project_id)
-            if project is None:
-                return False
-            session.delete(project)
-            session.commit()
-            return True
+    def delete_project(self, project_id: int) -> bool:
+        project = self.session.get(Project, project_id)
+        if project is None or project.user_id != self.user_id:
+            return False
+        self.session.delete(project)
+        self.session.commit()
+        return True
